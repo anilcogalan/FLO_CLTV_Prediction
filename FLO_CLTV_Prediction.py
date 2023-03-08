@@ -73,8 +73,11 @@ columns = ["order_num_total_ever_online",
 for col in columns:
     replace_with_thresholds(df, col)
 
-df["order_num_total"] = df["order_num_total_ever_online"] + df["order_num_total_ever_offline"]
-df["customer_value_total"] = df["customer_value_total_ever_offline"] + df["customer_value_total_ever_online"]
+df["order_num_total"] = df["order_num_total_ever_online"] + \
+                        df["order_num_total_ever_offline"]
+
+df["customer_value_total"] = df["customer_value_total_ever_offline"] + \
+                             df["customer_value_total_ever_online"]
 
 date_columns = df.columns[df.columns.str.contains("date")]
 df[date_columns] = df[date_columns].apply(pd.to_datetime)
@@ -86,8 +89,14 @@ analysis_date = dt.datetime(2021, 6, 1)
 
 cltv_df = pd.DataFrame()
 cltv_df["customer_id"] = df["master_id"]
-cltv_df["recency_cltv_weekly"] = ((df["last_order_date"] - df["first_order_date"]).astype('timedelta64[D]')) / 7
-cltv_df["T_weekly"] = ((analysis_date - df["first_order_date"]).astype('timedelta64[D]')) / 7
+cltv_df["recency_cltv_weekly"] = ((df["last_order_date"] - 
+                                   df["first_order_date"]).
+                                  astype('timedelta64[D]')) / 7
+
+cltv_df["T_weekly"] = ((analysis_date - 
+                        df["first_order_date"]).
+                       astype('timedelta64[D]')) / 7
+
 cltv_df["frequency"] = df["order_num_total"]
 cltv_df["monetary_cltv_avg"] = df["customer_value_total"] / df["order_num_total"]
 
@@ -142,6 +151,8 @@ cltv_df.head()
 
 cltv_df.groupby("cltv_segment").agg({"count", "mean", "sum"})
 
-cltv_df[["segment", "recency_cltv_weekly", "frequency", "monetary_cltv_avg"]].groupby("cltv_segment").agg(
-    ["mean", "count"])
+cltv_df[["segment", "recency_cltv_weekly", "frequency", "monetary_cltv_avg"]]. \
+    groupby("cltv_segment"). \
+    agg( ["mean", "count"])
+   
 
